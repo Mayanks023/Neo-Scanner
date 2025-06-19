@@ -25,14 +25,61 @@ def scan_port(ip, port, open_ports):
     except:
         pass
 
-def scan_host(ip, ports):
-    print(f"\n[*] Scanning host: {ip}")
-    open_ports = []
-    for port in ports:
-        scan_port(ip, port, open_ports)
+import time  # 🔁 Also make sure 'import time' is at the top
 
-    if not open_ports:
-        print("    [-] No open ports found.")
+# Common port-to-service map
+port_services = {
+    21: "ftp", 22: "ssh", 23: "telnet", 25: "smtp", 53: "dns",
+    80: "http", 110: "pop3", 139: "netbios-ssn", 143: "imap",
+    443: "https", 445: "microsoft-ds", 3306: "mysql", 3389: "rdp"
+}
+
+def scan_host(ip, ports):
+    print(f"\nScan report for {ip}")
+    start_time = time.time()
+
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(1)
+            s.connect((ip, 80))
+            latency = round((time.time() - start_time), 2)
+            print(f"Host is up ({latency}s latency).")
+    except:
+        print("Host is down or blocking ping probes.")
+        return
+
+    open_ports = []
+    filtered_ports = []
+
+    for port in ports:
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(0.5)
+                result = s.connect_ex((ip, port))
+                if result == 0:
+                    service = port_services.get(port, "unknown")
+                    open_ports.append((port, service))
+                elif result in (111, 113):
+                    filtered_ports.append((port, "filtered"))
+        except:
+            pass
+
+    total = len(ports)
+    closed = total - len(open_ports) - len(filtered_ports)
+
+    if open_ports:
+        print("\nPORT     STATE     SERVICE")
+        for port, service in open_ports:
+            print(f"{str(port).ljust(8)}open      {service}")
+    if filtered_ports:
+        for port, _ in filtered_ports:
+            print(f"{str(port).ljust(8)}filtered  {port_services.get(port, 'unknown')}")
+
+    if closed > 0:
+        print(f"\nNot shown: {closed} closed tcp ports (reset)")
+
+    print(f"\nScan done: 1 host scanned in {round(time.time() - start_time, 2)} seconds")
+
 
     
 def main():
