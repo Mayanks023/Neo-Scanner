@@ -1,4 +1,5 @@
 import socket
+import sys
 import ipaddress
 from concurrent.futures import ThreadPoolExecutor
 
@@ -24,7 +25,7 @@ def scan_host(ip, ports):
 
     
 def main():
-    print("\n=== NeoScanner (Modified) ===\n")
+    print("\n=== NeoScanner (by The_Mayanks) ===\n")
 
     if len(sys.argv) < 2:
         print("Usage: python3 Neoscanner.py <IP/CIDR/hostname> [port1,port2,...]")
@@ -37,13 +38,24 @@ def main():
     else:
         ports = [22, 80, 443]
 
+    try:
+        # Check if it's a CIDR/network
+        network = ipaddress.ip_network(target, strict=False)
+        print(f"[*] Scanning network: {target}")
+        print(f"[*] Ports to scan: {ports}")
+        with ThreadPoolExecutor(max_workers=100) as executor:
+            for ip in network.hosts():
+                executor.submit(scan_host, ip, ports)
+    except ValueError:
+        # Else, it's a single host/domain
+        try:
+            ip = socket.gethostbyname(target)
+            print(f"[*] Scanning host: {target} ({ip})")
+            print(f"[*] Ports to scan: {ports}")
+            scan_host(ip, ports)
+        except socket.gaierror:
+            print("[-] Invalid hostname or IP address.")
 
-    if len(sys.argv) >= 3:
-        ports = [int(p.strip()) for p in sys.argv[2].split(",") if p.strip().isdigit()]
-    else:
-        ports = [22, 80, 443]
-
-        
 
 
 if __name__ == "__main__":
