@@ -3,15 +3,13 @@ import ipaddress
 from concurrent.futures import ThreadPoolExecutor
 
 # Configuration
-ip_range = "192.168.1.0/24"
-ports_to_scan = [22, 80, 443]
-
-def scan_port(ip, port):
+def scan_port(ip, port, open_ports):
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.settimeout(0.5)
             s.connect((str(ip), port))
-            print(f"[+] {ip}:{port} is OPEN")
+            print(f"    [+] Port {port} is OPEN")
+            open_ports.append(port)
     except:
         pass
 
