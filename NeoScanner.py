@@ -36,6 +36,7 @@ def scan_host(ip, ports):
 
     
 def main():
+    banner()
     print("\n=== NeoScanner (by The_Mayanks) ===\n")
 
     if len(sys.argv) < 2:
