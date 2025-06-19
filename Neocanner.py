@@ -13,23 +13,23 @@ def scan_port(ip, port, open_ports):
     except:
         pass
 
-def scan_host(ip):
-    try:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.settimeout(0.5)
-            s.connect((str(ip), 80))
-            print(f"[+] Host {ip} is LIVE")
-            for port in ports_to_scan:
-                scan_port(ip, port)
-    except:
-        pass
+def scan_host(ip, ports):
+    print(f"\n[*] Scanning host: {ip}")
+    open_ports = []
+    for port in ports:
+        scan_port(ip, port, open_ports)
 
-def main():
-    print("[*] Starting Network Scan...")
-    network = ipaddress.ip_network(ip_range, strict=False)
-    with ThreadPoolExecutor(max_workers=100) as executor:
-        for ip in network.hosts():
-            executor.submit(scan_host, ip)
+    if not open_ports:
+        print("    [-] No open ports found.")
+
+    
+ddef main():
+    print("\n=== NeoScanner (Modified) ===\n")
+
+    if len(sys.argv) < 2:
+        print("Usage: python3 Neoscanner.py <IP/CIDR/hostname> [port1,port2,...]")
+        sys.exit(1)
+
 
 if __name__ == "__main__":
     main()
