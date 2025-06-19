@@ -23,20 +23,20 @@ def scan_host(ip, ports):
         print("    [-] No open ports found.")
 
     
-ddef main():
+def main():
     print("\n=== NeoScanner (Modified) ===\n")
 
     if len(sys.argv) < 2:
         print("Usage: python3 Neoscanner.py <IP/CIDR/hostname> [port1,port2,...]")
         sys.exit(1)
-      target = sys.argv[1]
+
+    target = sys.argv[1]
 
     if len(sys.argv) >= 3:
         ports = [int(p.strip()) for p in sys.argv[2].split(",") if p.strip().isdigit()]
     else:
         ports = [22, 80, 443]
 
-      target = sys.argv[1]
 
     if len(sys.argv) >= 3:
         ports = [int(p.strip()) for p in sys.argv[2].split(",") if p.strip().isdigit()]
