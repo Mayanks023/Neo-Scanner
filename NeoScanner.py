@@ -2,10 +2,14 @@ import socket
 import sys
 import ipaddress
 from concurrent.futures import ThreadPoolExecutor
+from colorama import Fore, Style, init
+import random
+
 
 # Configuration
 def banner():
-    print(r"""
+    colors = [Fore.RED, Fore.GREEN, Fore.BLUE, Fore.CYAN, Fore.MAGENTA, Fore.YELLOW]
+    banner_text = r"""
 ███╗   ██╗███████╗ ██████╗   ███████╗  ██████╗ █████╗ ███╗   ██╗███╗    ██╗███████╗██████╗ 
 ████╗  ██║██╔════╝██╔═══██║  ██╔════╝ ██╔════╝██╔══██╗████╗  ██║████╗   ██║██╔════╝██╔══██╗
 ██╔██╗ ██║█████╗  ██║   ██║  ███████╗ ██║     ███████║██╔██╗ ██║██╔██╗  ██║█████╗  ██████╔╝
@@ -13,7 +17,12 @@ def banner():
 ██║ ╚████║███████╗╚██████╔╝  ███████║ ╚██████╗██║  ██║██║ ╚████║██║  ╚████║███████╗██║  ██║
 ╚═╝  ╚═══╝╚══════╝ ╚═════╝   ╚══════╝  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═══╝╚═╝   ╚═══╝╚══════╝╚═╝  ╚═╝
                                [ Fast Python Port Scanner ]
-""")
+"""
+    for line in banner_text.splitlines():
+        if line.strip():
+            print(random.choice(colors) + line)
+        else:
+            print(line)
 
 def scan_port(ip, port, open_ports):
     try:
