@@ -48,23 +48,15 @@ def scan_host(ip, ports):
     start_time = time.time()
 
        # Check if host is up
-    host_up = False
-    test_ports = ports[:100] if len(ports) >= 100 else ports  # Test first 100 ports
-
-    for port in test_ports:
-        try:
-            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                s.settimeout(0.5)
-                if s.connect_ex((ip, port)) == 0:
-                    latency = round((time.time() - start_time), 2)
-                    print(f"Host is up ({latency}s latency).")
-                    host_up = True
-                    break
-        except:
-            pass
-
-    if not host_up:
-        print("Host is down or blocking all scanned ports.")
+  
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(1)
+            s.connect((ip, 80))
+            latency = round((time.time() - start_time), 2)
+            print(f"Host is up ({latency}s latency).")
+    except:
+        print("Host is down or blocking ping probes.")
         return
 
 
@@ -115,18 +107,24 @@ def main():
     if len(sys.argv) >= 3:
         ports = [int(p.strip()) for p in sys.argv[2].split(",") if p.strip().isdigit()]
     else:
-        print("[*] No ports specified. Scanning all 65535 ports (this may take time).")
-        ports = list(range(1, 65536))
+        
+        ports = [22, 80, 443]
 
 
     try:
-        # Check if it's a CIDR/network
-        network = ipaddress.ip_network(target, strict=False)
-        print(f"[*] Scanning network: {target}")
-        print(f"[*] Ports to scan: {ports}")
-        with ThreadPoolExecutor(max_workers=100) as executor:
-            for ip in network.hosts():
-                executor.submit(scan_host, ip, ports)
+        ip_obj = ipaddress.ip_network(target, strict=False)
+        if ip_obj.num_addresses > 1:
+            print(f"[*] Scanning network: {target}")
+            print(f"[*] Ports to scan: {ports}")
+            with ThreadPoolExecutor(max_workers=100) as executor:
+                for ip in ip_obj.hosts():
+                    executor.submit(scan_host, str(ip), ports)
+        else:
+            # It's just a single IP address
+            print(f"[*] Scanning single host: {target}")
+            print(f"[*] Ports to scan: {ports}")
+            scan_host(str(ip_obj.network_address), ports)
+
     except ValueError:
         # Else, it's a single host/domain
         try:
