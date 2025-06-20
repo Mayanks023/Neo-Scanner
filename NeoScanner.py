@@ -47,15 +47,26 @@ def scan_host(ip, ports):
     print(f"\nScan report for {ip}")
     start_time = time.time()
 
-    try:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.settimeout(1)
-            s.connect((ip, 80))
-            latency = round((time.time() - start_time), 2)
-            print(f"Host is up ({latency}s latency).")
-    except:
-        print("Host is down or blocking ping probes.")
+       # Check if host is up
+    host_up = False
+    test_ports = ports[:100] if len(ports) >= 100 else ports  # Test first 100 ports
+
+    for port in test_ports:
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(0.5)
+                if s.connect_ex((ip, port)) == 0:
+                    latency = round((time.time() - start_time), 2)
+                    print(f"Host is up ({latency}s latency).")
+                    host_up = True
+                    break
+        except:
+            pass
+
+    if not host_up:
+        print("Host is down or blocking all scanned ports.")
         return
+
 
     open_ports = []
     filtered_ports = []
