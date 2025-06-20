@@ -104,7 +104,9 @@ def main():
     if len(sys.argv) >= 3:
         ports = [int(p.strip()) for p in sys.argv[2].split(",") if p.strip().isdigit()]
     else:
-        ports = [22, 80, 443]
+        print("[*] No ports specified. Scanning all 65535 ports (this may take time).")
+        ports = list(range(1, 65536))
+
 
     try:
         # Check if it's a CIDR/network
