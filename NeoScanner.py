@@ -109,9 +109,14 @@ def main():
         # Else, it's a single host/domain
         try:
             ip = socket.gethostbyname(target)
-            print(f"[*] Scanning host: {target} ({ip})")
+            resolved = socket.gethostbyname_ex(target)
+            aliases = resolved[2]
+            print(f"[*] Scan report for {target} ({ip})")
+            if len(aliases) > 1:
+                print(f"[*] Other addresses for {target} (not scanned): {', '.join(aliases[1:])}")
             print(f"[*] Ports to scan: {ports}")
             scan_host(ip, ports)
+
         except socket.gaierror:
             print("[-] Invalid hostname or IP address.")
 
